@@ -19,8 +19,8 @@ mod private {
     pub(crate) trait SealedData {}
 
     impl<T> SealedData for Vec<T> {}
-    impl<'a, T> SealedData for &'a [T] {}
-    impl<'a, T> SealedData for &'a mut [T] {}
+    impl<T> SealedData for &[T] {}
+    impl<T> SealedData for &mut [T] {}
 }
 
 pub(crate) trait Array2DData:
@@ -382,10 +382,10 @@ impl<T> Array2DBase<Vec<T>> {
         self.data
     }
     pub(crate) fn data(&self) -> &[T] {
-        &*self.data
+        &self.data
     }
     pub(crate) fn data_mut(&mut self) -> &mut [T] {
-        &mut *self.data
+        &mut self.data
     }
 }
 
@@ -498,6 +498,7 @@ pub(crate) type Array2DMutSlice<'a, T> = Array2DBase<&'a mut [T]>;
 
 /// column-major 2D positions iterator
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Default)]
 pub(crate) struct Positions {
     x: usize,
     y: usize,
@@ -506,17 +507,6 @@ pub(crate) struct Positions {
     after_rev_y: usize,
 }
 
-impl Default for Positions {
-    fn default() -> Self {
-        Self {
-            x: 0,
-            y: 0,
-            y_size: 0,
-            rev_x: 0,
-            after_rev_y: 0,
-        }
-    }
-}
 
 impl Positions {
     pub(crate) fn new(x_size: usize, y_size: usize) -> Self {
