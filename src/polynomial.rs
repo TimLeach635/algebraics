@@ -1190,7 +1190,7 @@ impl<T: PolynomialCoefficient> Polynomial<T> {
     pub fn split_out_divisor(self) -> (Vec<T::Element>, T::Divisor) {
         self.into()
     }
-    pub fn iter(&self) -> Iter<T> {
+    pub fn iter(&self) -> Iter<'_, T> {
         Iter {
             elements: self.elements.iter(),
             divisor: &self.divisor,

@@ -481,7 +481,7 @@ impl RealAlgebraicNumber {
     pub fn interval(&self) -> &DyadicFractionInterval {
         &self.data().interval
     }
-    fn interval_shrinker(&mut self) -> IntervalShrinker {
+    fn interval_shrinker(&mut self) -> IntervalShrinker<'_> {
         let RealAlgebraicNumberData {
             minimal_polynomial,
             interval,
@@ -609,7 +609,7 @@ impl RealAlgebraicNumber {
     }
     /// shrinks the interval till it doesn't contain zero
     #[must_use]
-    fn remove_zero_from_interval(&mut self) -> Option<(Sign, IntervalShrinker)> {
+    fn remove_zero_from_interval(&mut self) -> Option<(Sign, IntervalShrinker<'_>)> {
         let sign = match self.cmp_with_zero() {
             Ordering::Equal => return None,
             Ordering::Less => Sign::Negative,
@@ -956,7 +956,7 @@ struct ResultFactor {
 }
 
 impl ResultFactor {
-    fn factor(&self) -> Cow<Polynomial<BigInt>> {
+    fn factor(&self) -> Cow<'_, Polynomial<BigInt>> {
         self.primitive_sturm_sequence
             .get(0)
             .map(Cow::Borrowed)

@@ -171,7 +171,7 @@ pub trait ModularReducePow<E = Self>: ModularReduce {
 }
 
 pub trait Modulus<Value: Clone + Eq>: Clone + Eq {
-    fn to_modulus(&self) -> Cow<Value>;
+    fn to_modulus(&self) -> Cow<'_, Value>;
     #[inline]
     fn into_modulus(self) -> Value {
         self.to_modulus().into_owned()
@@ -180,7 +180,7 @@ pub trait Modulus<Value: Clone + Eq>: Clone + Eq {
 
 impl<T: Modulus<Value>, Value: Clone + Eq> Modulus<Value> for &'_ T {
     #[inline]
-    fn to_modulus(&self) -> Cow<Value> {
+    fn to_modulus(&self) -> Cow<'_, Value> {
         (**self).to_modulus()
     }
 }
@@ -244,7 +244,7 @@ impl<T> Deref for KnownPrime<T> {
 
 impl<T: Modulus<Value>, Value: Eq + Clone> Modulus<Value> for KnownPrime<T> {
     #[inline]
-    fn to_modulus(&self) -> Cow<Value> {
+    fn to_modulus(&self) -> Cow<'_, Value> {
         self.0.to_modulus()
     }
     #[inline]
@@ -313,7 +313,7 @@ impl<T> Deref for KnownOdd<T> {
 
 impl<T: Modulus<Value>, Value: Eq + Clone> Modulus<Value> for KnownOdd<T> {
     #[inline]
-    fn to_modulus(&self) -> Cow<Value> {
+    fn to_modulus(&self) -> Cow<'_, Value> {
         self.0.to_modulus()
     }
     #[inline]
@@ -350,7 +350,7 @@ macro_rules! impl_int_modulus {
     ($t:ty, $wide:ty, $to_wide:expr, $from_wide:expr, $from_bigint:ident) => {
         impl Modulus<Self> for $t {
             #[inline]
-            fn to_modulus(&self) -> Cow<Self> {
+            fn to_modulus(&self) -> Cow<'_, Self> {
                 Cow::Borrowed(self)
             }
             #[inline]
@@ -516,7 +516,7 @@ macro_rules! impl_static_modulus {
         $(
             impl Modulus<$t> for $n {
                 #[inline]
-                fn to_modulus(&self) -> Cow<$t> {
+                fn to_modulus(&self) -> Cow<'_, $t> {
                     Cow::Owned($n.into_modulus())
                 }
                 #[inline]

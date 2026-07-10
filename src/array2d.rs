@@ -277,7 +277,7 @@ impl<Data: Array2DData> Array2DBase<Data> {
         &self,
         x_bound: XB,
         y_bound: YB,
-    ) -> Array2DSlice<Data::Element> {
+    ) -> Array2DSlice<'_, Data::Element> {
         let Array2DSliceData {
             x_size,
             y_size,
@@ -294,7 +294,7 @@ impl<Data: Array2DData> Array2DBase<Data> {
         &mut self,
         x_bound: XB,
         y_bound: YB,
-    ) -> Array2DMutSlice<Data::Element>
+    ) -> Array2DMutSlice<'_, Data::Element>
     where
         Data: BorrowMut<[<Data as Array2DData>::Element]>,
     {
@@ -313,14 +313,14 @@ impl<Data: Array2DData> Array2DBase<Data> {
     pub(crate) fn positions(&self) -> Positions {
         Positions::new(self.x_size, self.y_size)
     }
-    pub(crate) fn iter(&self) -> Iter<Data::Element> {
+    pub(crate) fn iter(&self) -> Iter<'_, Data::Element> {
         Iter {
             positions: self.positions(),
             stride: self.stride(),
             data: self.data.borrow(),
         }
     }
-    pub(crate) fn iter_mut(&mut self) -> IterMut<Data::Element>
+    pub(crate) fn iter_mut(&mut self) -> IterMut<'_, Data::Element>
     where
         Data: BorrowMut<[<Data as Array2DData>::Element]>,
     {
