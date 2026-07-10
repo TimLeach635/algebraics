@@ -859,7 +859,7 @@ mod tests {
     #[test]
     fn test_iter_mut() {
         let mut array = Array2DOwned::new_with_positions(2, 3, |x, y| x * 10 + y);
-        let expected_list: Vec<_> = array.data().iter().copied().collect();
+        let expected_list: Vec<_> = array.data().to_vec();
         for operation_mask in 0..(1 << expected_list.len()) {
             println!();
             let mut expected = expected_list.iter().copied();

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 // See Notices.txt for copyright information
 use crate::traits::{
-    AlwaysExactDivAssign, CharacteristicZero, ExactDiv, ExactDivAssign, GCDAndLCM,
-    RingCharacteristic, GCD,
+    AlwaysExactDivAssign, CharacteristicZero, ExactDiv, ExactDivAssign, ExactDivAssignError,
+    GCDAndLCM, RingCharacteristic, GCD,
 };
 use num_bigint::BigInt;
 use num_integer::Integer;
@@ -502,14 +502,14 @@ impl Mul<&DivisorIsOne> for &DivisorIsOne {
 }
 
 impl ExactDivAssign for DivisorIsOne {
-    fn checked_exact_div_assign(&mut self, _rhs: DivisorIsOne) -> Result<(), ()> {
+    fn checked_exact_div_assign(&mut self, _rhs: DivisorIsOne) -> Result<(), ExactDivAssignError> {
         Ok(())
     }
     fn exact_div_assign(&mut self, _rhs: DivisorIsOne) {}
 }
 
 impl ExactDivAssign<&DivisorIsOne> for DivisorIsOne {
-    fn checked_exact_div_assign(&mut self, _rhs: &DivisorIsOne) -> Result<(), ()> {
+    fn checked_exact_div_assign(&mut self, _rhs: &DivisorIsOne) -> Result<(), ExactDivAssignError> {
         Ok(())
     }
     fn exact_div_assign(&mut self, _rhs: &DivisorIsOne) {}
@@ -1486,9 +1486,9 @@ impl<T: PolynomialCoefficient> Polynomial<T> {
             T::make_zero_coefficient_from_coefficient(Cow::Borrowed(at)),
         )
     }
-    pub fn set_one_if_nonzero(&mut self) -> Result<(), ()> {
+    pub fn set_one_if_nonzero(&mut self) -> Result<(), EmptyPolynomial> {
         if self.elements.is_empty() {
-            Err(())
+            Err(EmptyPolynomial)
         } else {
             self.elements.drain(1..);
             self.divisor = One::one();
@@ -1499,7 +1499,7 @@ impl<T: PolynomialCoefficient> Polynomial<T> {
     pub fn into_one_if_nonzero(mut self) -> Result<Self, Self> {
         match self.set_one_if_nonzero() {
             Ok(()) => Ok(self),
-            Err(()) => Err(self),
+            Err(EmptyPolynomial) => Err(self),
         }
     }
     #[must_use]
@@ -1747,6 +1747,17 @@ impl From<PolynomialIsZero> for std::io::Error {
         Self::new(std::io::ErrorKind::InvalidInput, err)
     }
 }
+
+#[derive(Debug)]
+pub struct EmptyPolynomial;
+
+impl fmt::Display for EmptyPolynomial {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Empty polynomial")
+    }
+}
+
+impl std::error::Error for EmptyPolynomial {}
 
 #[cfg(test)]
 mod tests {

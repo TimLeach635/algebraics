@@ -1141,8 +1141,9 @@ pub(crate) mod tests {
     pub(crate) fn test_checked_op_helper<
         T: Clone + PartialEq + fmt::Debug,
         R: Clone,
-        OpEqMove: Fn(&mut T, R) -> Result<(), ()>,
-        OpEqRef: Fn(&mut T, &R) -> Result<(), ()>,
+        Err,
+        OpEqMove: Fn(&mut T, R) -> Result<(), Err>,
+        OpEqRef: Fn(&mut T, &R) -> Result<(), Err>,
         OpRefRef: Fn(&T, &R) -> Option<T>,
         OpMoveRef: Fn(T, &R) -> Option<T>,
         OpRefMove: Fn(&T, R) -> Option<T>,

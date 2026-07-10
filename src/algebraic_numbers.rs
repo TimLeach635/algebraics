@@ -4,7 +4,8 @@
 use crate::{
     interval_arithmetic::DyadicFractionInterval,
     polynomial::Polynomial,
-    traits::{AlwaysExactDiv, AlwaysExactDivAssign, CeilLog2, ExactDiv, ExactDivAssign, FloorLog2},
+    traits::{AlwaysExactDiv, AlwaysExactDivAssign, CeilLog2, ExactDiv, ExactDivAssign,
+        ExactDivAssignError, FloorLog2},
     util::{DebugAsDisplay, Sign},
 };
 use num_bigint::{BigInt, BigUint};
@@ -313,7 +314,6 @@ fn distance(a: usize, b: usize) -> usize {
 
 #[derive(Debug)]
 struct IntervalShrinker<'a> {
-    minimal_polynomial: &'a Polynomial<BigInt>,
     primitive_sturm_sequence: Cow<'a, [Polynomial<BigInt>]>,
     interval: IntervalAndSignChanges<'a>,
 }
@@ -327,12 +327,10 @@ enum IntervalShrinkResult {
 impl<'a> IntervalShrinker<'a> {
     #[inline]
     fn with_primitive_sturm_sequence(
-        minimal_polynomial: &'a Polynomial<BigInt>,
         primitive_sturm_sequence: Cow<'a, [Polynomial<BigInt>]>,
         interval: &'a mut DyadicFractionInterval,
     ) -> Self {
         IntervalShrinker {
-            minimal_polynomial,
             primitive_sturm_sequence,
             interval: IntervalAndSignChanges::new(interval),
         }
@@ -342,7 +340,6 @@ impl<'a> IntervalShrinker<'a> {
         interval: &'a mut DyadicFractionInterval,
     ) -> Self {
         Self::with_primitive_sturm_sequence(
-            minimal_polynomial,
             Cow::Owned(minimal_polynomial.to_primitive_sturm_sequence()),
             interval,
         )
@@ -1435,14 +1432,14 @@ impl Mul<&RealAlgebraicNumber> for &RealAlgebraicNumber {
 }
 
 impl ExactDivAssign for RealAlgebraicNumber {
-    fn checked_exact_div_assign(&mut self, rhs: RealAlgebraicNumber) -> Result<(), ()> {
+    fn checked_exact_div_assign(&mut self, rhs: RealAlgebraicNumber) -> Result<(), ExactDivAssignError> {
         self.checked_exact_div_assign(&rhs)
     }
 }
 
 impl ExactDivAssign<&'_ RealAlgebraicNumber> for RealAlgebraicNumber {
-    fn checked_exact_div_assign(&mut self, rhs: &RealAlgebraicNumber) -> Result<(), ()> {
-        self.mul_assign(&rhs.checked_recip().ok_or(())?);
+    fn checked_exact_div_assign(&mut self, rhs: &RealAlgebraicNumber) -> Result<(), ExactDivAssignError> {
+        self.mul_assign(&rhs.checked_recip().ok_or(ExactDivAssignError)?);
         Ok(())
     }
 }

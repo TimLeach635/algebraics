@@ -5,8 +5,7 @@ use crate::{
     polynomial::{
         Polynomial, PolynomialCoefficient, PolynomialCoefficientElement, PolynomialDivSupported,
         PseudoDivRem,
-    },
-    traits::{ExactDiv, ExactDivAssign},
+    }, traits::{ExactDiv, ExactDivAssign, ExactDivAssignError},
 };
 use num_integer::Integer;
 use num_traits::{CheckedDiv, CheckedRem, Zero};
@@ -276,13 +275,13 @@ macro_rules! impl_div_rem_eq {
                 let lhs = mem::replace(self, Zero::zero());
                 *self = lhs.exact_div(rhs);
             }
-            fn checked_exact_div_assign(&mut self, rhs: $r) -> Result<(), ()> {
+            fn checked_exact_div_assign(&mut self, rhs: $r) -> Result<(), ExactDivAssignError> {
                 (&*self)
                     .checked_exact_div(rhs)
                     .map(|v| {
                         *self = v;
                     })
-                    .ok_or(())
+                    .ok_or(ExactDivAssignError)
             }
         }
     };
@@ -345,8 +344,8 @@ fn checked_div_single<T: PolynomialCoefficient + for<'a> ExactDiv<&'a T, Output 
 fn checked_div_assign_single<T: PolynomialCoefficient + for<'a> ExactDiv<&'a T, Output = T>>(
     lhs: &mut Polynomial<T>,
     rhs: &T,
-) -> Result<(), ()> {
-    *lhs = checked_div_single(Cow::Owned(mem::replace(lhs, Zero::zero())), rhs).ok_or(())?;
+) -> Result<(), ExactDivAssignError> {
+    *lhs = checked_div_single(Cow::Owned(mem::replace(lhs, Zero::zero())), rhs).ok_or(ExactDivAssignError)?;
     Ok(())
 }
 
@@ -452,7 +451,7 @@ impl<T: PolynomialCoefficient + for<'a> ExactDiv<&'a T, Output = T>> ExactDivAss
     fn exact_div_assign(&mut self, rhs: T) {
         div_assign_single(self, &rhs);
     }
-    fn checked_exact_div_assign(&mut self, rhs: T) -> Result<(), ()> {
+    fn checked_exact_div_assign(&mut self, rhs: T) -> Result<(), ExactDivAssignError> {
         checked_div_assign_single(self, &rhs)
     }
 }
@@ -463,7 +462,7 @@ impl<T: PolynomialCoefficient + for<'b> ExactDiv<&'b T, Output = T>> ExactDivAss
     fn exact_div_assign(&mut self, rhs: &T) {
         div_assign_single(self, rhs);
     }
-    fn checked_exact_div_assign(&mut self, rhs: &T) -> Result<(), ()> {
+    fn checked_exact_div_assign(&mut self, rhs: &T) -> Result<(), ExactDivAssignError> {
         checked_div_assign_single(self, rhs)
     }
 }

@@ -542,13 +542,9 @@ impl Polynomial<BigInt> {
 
         modular_factors.retain(|factor| factor.degree() != Some(0));
 
-        debug_assert!(modular_factors
+        debug_assert!(!modular_factors
             .iter()
-            .position(|factor| match factor.degree() {
-                None | Some(0) => true,
-                _ => false,
-            })
-            .is_none());
+            .any(|factor| matches!(factor.degree(), None | Some(0))));
 
         // println!("modular_factors:");
         // for factor in &modular_factors {

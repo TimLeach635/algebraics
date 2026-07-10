@@ -4,8 +4,8 @@
 use crate::{
     polynomial::{DivisorIsOne, PolynomialCoefficient, PolynomialReducingFactorSupported},
     traits::{
-        AlwaysExactDiv, AlwaysExactDivAssign, ExactDiv, ExactDivAssign, ExtendedGCD,
-        ExtendedGCDResult, GCD,
+        AlwaysExactDiv, AlwaysExactDivAssign, ExactDiv, ExactDivAssign, ExactDivAssignError,
+        ExtendedGCD, ExtendedGCDResult, GCD,
     },
     util::BaseAndExponent,
 };
@@ -1110,13 +1110,13 @@ macro_rules! impl_exact_div {
             fn exact_div_assign(&mut self, rhs: $rhs) {
                 self.div_assign(rhs);
             }
-            fn checked_exact_div_assign(&mut self, rhs: $rhs) -> Result<(), ()> {
+            fn checked_exact_div_assign(&mut self, rhs: $rhs) -> Result<(), ExactDivAssignError> {
                 (&*self)
                     .checked_exact_div(rhs)
                     .map(|v| {
                         *self = v;
                     })
-                    .ok_or(())
+                    .ok_or(ExactDivAssignError)
             }
         }
 
